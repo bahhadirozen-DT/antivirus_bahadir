@@ -2,189 +2,247 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCHEKUR Yerel Siber Güvenlik Laboratuvarı</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>🛡️ SCHEKUR Hibrit Pro Antivirüs</title>
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { background-color: #161b22; border: 1px solid #30363d; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .card-header { background-color: #21262d; border-bottom: 1px solid #30363d; font-weight: bold; color: #58a6ff; }
-        .btn-primary { background-color: #1f6feb; border: none; }
-        .btn-primary:hover { background-color: #388bfd; }
-        .btn-warning { background-color: #d29922; color: #0d1117; border: none; }
-        .btn-danger { background-color: #da3633; border: none; }
-        .list-group-item { background-color: #161b22; border: 1px solid #30363d; color: #c9d1d9; margin-bottom: 5px; border-radius: 6px; }
-        .badge-clean { background-color: #238636; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
-        .badge-warning { background-color: #9e6a00; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
-        .badge-danger { background-color: #da3633; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
-        .navbar { background-color: #161b22; border-bottom: 1px solid #30363d; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0d1117; margin: 40px; color: #c9d1d9; }
+        .container { max-width: 1100px; background: #161b22; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 30px; border: 1px solid #30363d; }
+        input[type="text"] { width: 70%; padding: 12px; font-size: 16px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: white; }
+        button { padding: 12px 24px; font-size: 16px; background-color: #1f6feb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
+        button:hover { background-color: #388bfd; }
+        .btn-delete { background-color: #da3633; font-size: 12px; padding: 6px 12px; margin-left: 10px; color: white; border: none; border-radius:3px; cursor:pointer;}
+        .btn-quarantine { background-color: #d29922; color: black; font-size: 12px; padding: 6px 12px; margin-left: 5px; border: none; border-radius:3px; cursor:pointer; font-weight: bold;}
+        .btn-vt { background-color: #8957e5; color: white; font-size: 12px; padding: 6px 12px; margin-left: 5px; border: none; border-radius:3px; cursor:pointer;}
+        .btn-restore { background-color: #238636; color: white; font-size: 12px; padding: 6px 12px; border: none; border-radius:3px; cursor:pointer; font-weight: bold;}
+        #results { margin-top: 20px; max-height: 400px; overflow-y: auto; border-top: 1px solid #30363d; padding-top: 10px; }
+        .clean { color: #58a6ff; background: #21262d; margin: 5px 0; padding: 10px; border-radius:4px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #238636; }
+        .danger { color: #f85149; background: #21262d; font-weight: bold; margin: 5px 0; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #da3633; }
+        .warning { color: #d29922; background: #21262d; font-weight: bold; margin: 5px 0; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #d29922; }
+        
+        /* Karantina ve Ağ Bölümü Stilleri */
+        .quarantine-section, .network-section { max-width: 1100px; background: #161b22; padding: 25px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 30px; }
+        .quarantine-item, .network-item { background: #0d1117; padding: 12px; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.5); border-top: 1px solid #30363d; border-right: 1px solid #30363d; border-bottom: 1px solid #30363d;}
+        .network-item { border-left: 5px solid #f85149; }
     </style>
 </head>
 <body>
-
-<nav class="navbar navbar-dark px-4">
-    <span class="navbar-brand mb-0 h1 text-info">🛡️ SCHEKUR Siber Güvenlik Laboratuvarı (Lokal)</span>
-</nav>
-
-<div class="container mt-4">
-    <div class="row">
+    <div class="container">
+        <h1>🛡️ SCHEKUR Hibrit Antivirüs Motoru (Pro Sürüm)</h1>
+        <p>Klasör yolunu girin. Sistem imza taraması yaparken, <b>PDF dosyalarını gömülü script/makro risklerine karşı</b> derinlemesine inceler:</p>
         
-        <div class="col-md-7">
-            <div class="card">
-                <div class="card-header">📂 Downloads Klasörü Dosya Tarama Motoru</div>
-                <div class="card-body text-center">
-                    <p>Bilgisayarınızın İndirilenler dizinindeki scriptleri ve zararlı imzaları denetleyin.</p>
-                    <button class="btn btn-primary btn-lg w-100" id="taramaButon" onclick="taramaBaslat()">🚀 Jet Hızında Dosya Tara</button>
-                    <div id="yukleniyor" class="mt-3 text-warning" style="display:none;">🔎 Dosyalar derinlemesine inceleniyor, lütfen bekleyin...</div>
-                </div>
-            </div>
+        <input type="text" id="folderPath" placeholder="Örn: C:\\Users\\Asus\\Downloads">
+        <button onclick="startScan()">⚡ Derinlemesine Tara</button>
 
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>🌐 Canlı Ağ İzleme (Dış Bağlantı Dedektörü)</span>
-                    <button class="btn btn-sm btn-outline-info" onclick="agTaramasiYap()">🔄 Yenile</button>
-                </div>
-                <div class="card-body">
-                    <p class="small text-muted">Bilgisayarınıza dışarıdan kurulmuş veya dışarıya giden aktif IP bağlantılarını listeler.</p>
-                    <ul class="list-group" id="agSonucListesi">
-                        <li class="list-group-item text-center text-muted">Yenile butonuna basarak ağ trafiğini kontrol edin.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header" id="sonucOzet">📊 Tarama Sonuç Raporu</div>
-                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                    <ul class="list-group" id="sonucListesi">
-                        <li class="list-group-item text-center text-muted">Tarama sonuçları burada listelenecek.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-header text-warning">☣️ Karantina Yönetim Merkezi</div>
-                <div class="card-body">
-                    <p class="small text-muted">Sistemden tamamen yalıtılmış dosyalar:</p>
-                    <ul class="list-group" id="karantinaListesi">
-                        <li class="list-group-item text-center text-muted">Karantina şu an boş.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
+        <h3 id="status" style="color: #58a6ff;"></h3>
+        <div id="results"></div>
     </div>
-</div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    karantinaListele();
-    agTaramasiYap();
-});
+    <div class="network-section">
+        <h2>🌐 Canlı Ağ İzleme (Dış Bağlantı Dedektörü)</h2>
+        <p>Bilgisayarınıza dışarıdan kurulmuş veya arka planda dışarıya sızmaya çalışan tüm aktif yabancı IP bağlantılarını listeler.</p>
+        <button onclick="loadNetworkList()" style="background-color: #21262d; color: #58a6ff; border: 1px solid #30363d; padding: 8px 16px; font-size: 14px; margin-bottom: 15px; border-radius: 4px; cursor: pointer;">🔄 Ağ Trafiğini Denetle</button>
+        <div id="networkList"><p style="color: #8b949e;">Yükleniyor veya harici bağlantı aranıyor...</p></div>
+    </div>
 
-function taramaBaslat() {
-    document.getElementById("yukleniyor").style.display = "block";
-    document.getElementById("taramaButon").disabled = true;
-    
-    fetch('/tarama', { method: 'POST' })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("yukleniyor").style.display = "none";
-        document.getElementById("taramaButon").disabled = false;
-        
-        document.getElementById("sonucOzet").innerText = `✅ Tarama ${data.gecen_sure} saniyede bitti! Toplam ${data.toplam_dosya} dosya incelendi.`;
-        
-        let liste = document.getElementById("sonucListesi");
-        liste.innerHTML = "";
-        
-        data.sonuclar.forEach(item => {
-            let li = document.createElement("li");
-            li.className = "list-group-item d-flex justify-content-between align-items-center";
+    <div class="quarantine-section">
+        <h2>☣️ Karantina Yönetim Merkezi</h2>
+        <p>Karantinaya taşınan tehditleri buradan yönetebilir, güvenli olduğunu bildiğiniz dosyaları eski yerlerine iade edebilirsiniz.</p>
+        <button onclick="loadQuarantineList()" style="background-color: #21262d; color: #58a6ff; border: 1px solid #30363d; padding: 8px 16px; font-size: 14px; margin-bottom: 15px; border-radius: 4px; cursor: pointer;">🔄 Listeyi Yenile</button>
+        <div id="quarantineList"><p style="color: #8b949e;">Yükleniyor veya karantina boş...</p></div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            loadQuarantineList();
+            loadNetworkList();
+        };
+
+        async function startScan() {
+            const path = document.getElementById('folderPath').value;
+            const statusText = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
             
-            let icerik = "";
-            if(item.durum === "TEMİZ") {
-                icerik = `<span>✔️ <span class="badge badge-clean">TEMİZ</span> ${item.dosya}</span>`;
-            } else if(item.durum === "ŞÜPHELİ") {
-                icerik = `<span>⚠️ <span class="badge badge-warning">ŞÜPHELİ SCRIPT</span> ${item.dosya} -> <small class="text-warning">${item.mesaj}</small></span>
-                          <div>
-                            <button class="btn btn-sm btn-warning me-1" onclick="karantinayaAl('${item.dosya.replace(/\\/g, '\\\\')}')">Karantina</button>
-                          </div>`;
-            } else if(item.durum === "TEHLİKE") {
-                icerik = `<span>🚨 <span class="badge badge-danger">TEHLİKE</span> ${item.dosya} -> <small class="text-danger">${item.mesaj}</small></span>
-                          <div>
-                            <button class="btn btn-sm btn-danger me-1" onclick="karantinayaAl('${item.dosya.replace(/\\/g, '\\\\')}')">Karantina</button>
-                          </div>`;
+            if (!path) { alert("Lütfen bir klasör yolu girin!"); return; }
+            statusText.innerText = "⚡ Klasör derinlemesine analiz ediliyor, lütfen bekleyin...";
+            resultsDiv.innerHTML = "";
+
+            try {
+                const response = await fetch('/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: path })
+                });
+                
+                if (!response.ok) {
+                    statusText.innerText = "❌ Sunucu yanıt vermedi veya klasör okunamadı.";
+                    return;
+                }
+
+                const data = await response.json();
+                statusText.innerText = `✅ Tarama ${data.duration} saniyede bitti! Toplam ${data.total_scanned} dosya incelendi.`;
+                
+                data.results.forEach((item, index) => {
+                    const p = document.createElement('p');
+                    const encodedPath = btoa(unescape(encodeURIComponent(item.file)));
+                    
+                    if (item.status === 'INFECTED') {
+                        p.className = 'danger';
+                        p.id = `row-${index}`;
+                        p.innerHTML = `
+                            <span>🚨 [TEHLİKE] ${item.file} -> VİRÜS: ${item.malware}</span>
+                            <div>
+                                <button class="btn-quarantine" onclick="actionFile('quarantine', '${encodedPath}', 'row-${index}')">Karantina</button>
+                                <button class="btn-delete" onclick="actionFile('delete', '${encodedPath}', 'row-${index}')">Sil</button>
+                            </div>
+                        `;
+                    } else if (item.status === 'SUSPICIOUS') {
+                        p.className = 'warning';
+                        p.id = `row-${index}`;
+                        p.innerHTML = `
+                            <span>⚠️ [ŞÜPHELİ SCRIPT] ${item.file} -> Tetikleyiciler: ${item.details}</span>
+                            <div>
+                                <button class="btn-quarantine" onclick="actionFile('quarantine', '${encodedPath}', 'row-${index}')">Karantina</button>
+                                <button class="btn-delete" onclick="actionFile('delete', '${encodedPath}', 'row-${index}')">Sil</button>
+                            </div>
+                        `;
+                    } else {
+                        p.className = 'clean';
+                        p.id = `row-${index}`;
+                        p.innerHTML = `
+                            <span>✔️ [TEMİZ] ${item.file}</span>
+                            <button class="btn-vt" onclick="checkVT('${item.hash}', 'row-${index}')">Bulutta Sorgula (VirusTotal)</button>
+                        `;
+                    }
+                    resultsDiv.appendChild(p);
+                });
+            } catch (error) { 
+                statusText.innerText = "❌ Zaman aşımı veya sunucu bağlantı hatası."; 
             }
-            
-            li.innerHTML = icerik;
-            liste.appendChild(li);
-        });
-    });
-}
-
-function agTaramasiYap() {
-    let agListe = document.getElementById("agSonucListesi");
-    agListe.innerHTML = `<li class="list-group-item text-center text-info">Ağ trafiği analiz ediliyor...</li>`;
-    
-    fetch('/ag_taramasi')
-    .then(res => res.json())
-    .then(data => {
-        agListe.innerHTML = "";
-        if(!data.baglantilar || data.baglantilar.length === 0) {
-            agListe.innerHTML = `<li class="list-group-item text-center text-success">✔️ Dışarıdan bağlanan aktif yabancı IP bağlantısı tespit edilmedi.</li>`;
-            return;
         }
-        
-        data.baglantilar.forEach(bag => {
-            let li = document.createElement("li");
-            li.className = "list-group-item d-flex justify-content-between align-items-center border-danger";
-            li.innerHTML = `<span>⚡ <b>${bag.program}</b> (PID: ${bag.pid}) -> Dış IP: <span class="text-danger">${bag.ip}:${bag.port}</span></span>
-                            <span class="badge bg-danger">AKTİF BAĞLANTI</span>`;
-            agListe.appendChild(li);
-        });
-    });
-}
 
-function karantinayaAl(yol) {
-    fetch('/karantina', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ dosya_yolu: yol })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.durum === "basarili") {
-            karantinaListele();
-            taramaBaslat();
-        } else {
-            alert("Hata: " + data.mesaj);
-        }
-    });
-}
+        async function checkVT(fileHash, rowId) {
+            const row = document.getElementById(rowId);
+            row.style.opacity = "0.5";
+            try {
+                const response = await fetch('/check_vt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hash: fileHash })
+                });
+                const data = await response.json();
+                row.style.opacity = "1";
 
-function karantinaListele() {
-    fetch('/karantina_listesi')
-    .then(res => res.json())
-    .then(data => {
-        let kListe = document.getElementById("karantinaListesi");
-        kListe.innerHTML = "";
-        
-        let keys = Object.keys(data);
-        if(keys.length === 0) {
-            kListe.innerHTML = `<li class="list-group-item text-center text-muted">Karantina şu an boş.</li>`;
-            return;
+                if (data.status === 'INFECTED') {
+                    row.className = 'danger';
+                    row.innerHTML = `<span>🚨 [BULUTTA YAKALANDI] -> VİRÜS: ${data.malware}</span>`;
+                } else {
+                    alert("✨ Temiz! Devasa VirusTotal veri tabanında da bu dosya güvenli çıktı.");
+                }
+            } catch (e) {
+                row.style.opacity = "1";
+                alert("VirusTotal sorgusu esnasında bir hata oluştu.");
+            }
         }
-        
-        keys.forEach(anahtar => {
-            let li = document.createElement("li");
-            li.className = "list-group-item d-flex flex-column align-items-start";
-            li.innerHTML = `<b class="text-danger">📦 ${anahtar}</b>
-                            <small class="text-muted" style="font-size:11px;">Konum: ${data[anahtar]}</small>`;
-            kListe.appendChild(li);
-        });
-    });
-}
-</script>
+
+        async function actionFile(action, encodedPath, rowId) {
+            try {
+                const response = await fetch('/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action, path: encodedPath })
+                });
+                const data = await response.json();
+                alert(data.message);
+                if(data.success) {
+                    document.getElementById(rowId).style.backgroundColor = "#21262d";
+                    document.getElementById(rowId).style.color = "#8b949e";
+                    document.getElementById(rowId).innerHTML = `✅ İşlem tamamlandı.`;
+                    loadQuarantineList(); 
+                }
+            } catch(e) {
+                alert("İşlem gerçekleştirilemedi.");
+            }
+        }
+
+        // Karantina listesini yeniler
+        async function loadQuarantineList() {
+            const qListDiv = document.getElementById('quarantineList');
+            try {
+                const response = await fetch('/quarantine_list');
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    qListDiv.innerHTML = "<p style='color: #8b949e;'>Karantina bölgesi şu an tertemiz. Tehdit bulunmuyor.</p>";
+                    return;
+                }
+                
+                qListDiv.innerHTML = "";
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'quarantine-item';
+                    div.innerHTML = `
+                        <div>
+                            <strong>📄 Dosya Adı:</strong> ${item.filename}<br>
+                            <small style="color: #8b949e;">Orijinal Konum: ${item.orig_path}</small>
+                        </div>
+                        <div>
+                            <button class="btn-restore" onclick="manageQuarantine('restore', '${item.id}')">Geri Yükle</button>
+                            <button class="btn-delete" onclick="manageQuarantine('permanent_delete', '${item.id}')">Kalıcı Sil</button>
+                        </div>
+                    `;
+                    qListDiv.appendChild(div);
+                });
+            } catch(e) {
+                qListDiv.innerHTML = "<p style='color: #f85149;'>Karantina listesi yüklenirken hata oluştu.</p>";
+            }
+        }
+
+        async function manageQuarantine(action, fileId) {
+            try {
+                const response = await fetch('/manage_quarantine', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action, id: fileId })
+                });
+                const data = await response.json();
+                alert(data.message);
+                loadQuarantineList();
+            } catch(e) {
+                alert("Karantina işlemi başarısız.");
+            }
+        }
+
+        // YENİ: Aktif Dış Ağ Bağlantılarını Çeken JavaScript Fonksiyonu
+        async function loadNetworkList() {
+            const nListDiv = document.getElementById('networkList');
+            nListDiv.innerHTML = "<p style='color: #58a6ff;'>Ağ trafiği analiz ediliyor...</p>";
+            try {
+                const response = await fetch('/ag_taramasi');
+                const data = await response.json();
+                
+                if (data.baglantilar.length === 0) {
+                    nListDiv.innerHTML = "<p style='color: #3f6;'>✔️ Dışarıdan bağlanan aktif yabancı IP bağlantısı tespit edilmedi. Güvendesiniz.</p>";
+                    return;
+                }
+                
+                nListDiv.innerHTML = "";
+                data.baglantilar.forEach(bag => {
+                    const div = document.createElement('div');
+                    div.className = 'network-item';
+                    div.innerHTML = `
+                        <div>
+                            ⚡ <b>Uygulama:</b> ${bag.program} (PID: ${bag.pid})<br>
+                            📡 <b>Uzak İstasyon:</b> <span style="color: #f85149; font-weight: bold;">${bag.ip}:${bag.port}</span>
+                        </div>
+                        <div>
+                            <span style="background-color: #da3633; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">AKTİF BAĞLANTI</span>
+                        </div>
+                    `;
+                    nListDiv.appendChild(div);
+                });
+            } catch(e) {
+                nListDiv.innerHTML = "<p style='color: #f85149;'>Ağ listesi yüklenirken bir hata oluştu.</p>";
+            }
+        }
+    </script>
 </body>
 </html>
