@@ -20,8 +20,21 @@
         
         /* Karantina ve Ağ Bölümü Stilleri */
         .quarantine-section, .network-section { max-width: 1100px; background: #161b22; padding: 25px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 30px; }
-        .quarantine-item, .network-item { background: #0d1117; padding: 12px; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.5); border-top: 1px solid #30363d; border-right: 1px solid #30363d; border-bottom: 1px solid #30363d;}
-        .network-item { border-left: 5px solid #f85149; }
+        .quarantine-item { background: #0d1117; padding: 12px; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.5); border-top: 1px solid #30363d; border-right: 1px solid #30363d; border-bottom: 1px solid #30363d;}
+        
+        /* Dinamik Ağ Analiz Kartları */
+        .network-item { background: #0d1117; padding: 15px; margin: 10px 0; border-radius: 6px; border: 1px solid #30363d; box-shadow: 0 2px 5px rgba(0,0,0,0.4); }
+        .net-GÜVENLİ { border-left: 5px solid #238636; }
+        .net-DİKKAT { border-left: 5px solid #d29922; }
+        .net-TEHLİKELİ { border-left: 5px solid #f85149; }
+        .net-BİLİNMİYOR { border-left: 5px solid #8b949e; }
+        
+        .ai-box { background: #161b22; padding: 8px 12px; margin-top: 8px; border-radius: 4px; border: 1px solid #21262d; font-size: 13px; color: #8b949e; line-height: 1.4; }
+        .badge-GÜVENLİ { background: #238636; color: white; }
+        .badge-DİKKAT { background: #d29922; color: black; }
+        .badge-TEHLİKELİ { background: #f85149; color: white; }
+        .badge-BİLİNMİYOR { background: #8b949e; color: white; }
+        .net-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -163,7 +176,6 @@
             }
         }
 
-        // Karantina listesini yeniler
         async function loadQuarantineList() {
             const qListDiv = document.getElementById('quarantineList');
             try {
@@ -211,7 +223,7 @@
             }
         }
 
-        // YENİ: Aktif Dış Ağ Bağlantılarını Çeken JavaScript Fonksiyonu
+        // TADİLATI YAPILAN: Yapay Zeka Analizli ve Kapatma Butonlu Yeni Ağ İzleme Fonksiyonu
         async function loadNetworkList() {
             const nListDiv = document.getElementById('networkList');
             nListDiv.innerHTML = "<p style='color: #58a6ff;'>Ağ trafiği analiz ediliyor...</p>";
@@ -219,7 +231,7 @@
                 const response = await fetch('/ag_taramasi');
                 const data = await response.json();
                 
-                if (data.baglantilar.length === 0) {
+                if (!data.baglantilar || data.baglantilar.length === 0) {
                     nListDiv.innerHTML = "<p style='color: #3f6;'>✔️ Dışarıdan bağlanan aktif yabancı IP bağlantısı tespit edilmedi. Güvendesiniz.</p>";
                     return;
                 }
@@ -227,20 +239,51 @@
                 nListDiv.innerHTML = "";
                 data.baglantilar.forEach(bag => {
                     const div = document.createElement('div');
-                    div.className = 'network-item';
+                    div.className = `network-item net-${bag.status}`;
                     div.innerHTML = `
-                        <div>
-                            ⚡ <b>Uygulama:</b> ${bag.program} (PID: ${bag.pid})<br>
-                            📡 <b>Uzak İstasyon:</b> <span style="color: #f85149; font-weight: bold;">${bag.ip}:${bag.port}</span>
-                        </div>
-                        <div>
-                            <span style="background-color: #da3633; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">AKTİF BAĞLANTI</span>
+                        <div style="display: flex; justify-content: space-between; align-items: start; width: 100%;">
+                            <div style="flex-grow: 1; padding-right: 20px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                    <span style="font-size: 16px; font-weight: bold; color: white;">⚡ ${bag.program}</span>
+                                    <small style="color: #8b949e;">(PID: ${bag.pid})</small>
+                                    <span class="net-badge badge-${bag.status}">${bag.status}</span>
+                                </div>
+                                <div style="color: #58a6ff; font-size: 14px;">
+                                    📡 Uzak İstasyon: <strong style="color: #f85149;">${bag.ip}:${bag.port}</strong>
+                                </div>
+                                <div class="ai-box">
+                                    🤖 <strong>AI Güvenlik Yorumu:</strong> ${bag.analysis}
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 140px;">
+                                <span style="background-color: #da3633; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; width: max-content;">AKTİF BAĞLANTI</span>
+                                <button class="btn-delete" style="margin: 0; padding: 8px 12px; font-weight: bold;" onclick="killNetworkProcess('${bag.pid}')">❌ Bağlantıyı Kopar</button>
+                            </div>
                         </div>
                     `;
                     nListDiv.appendChild(div);
                 });
             } catch(e) {
                 nListDiv.innerHTML = "<p style='color: #f85149;'>Ağ listesi yüklenirken bir hata oluştu.</p>";
+            }
+        }
+
+        // YENİ: Seçilen PID bacağını sistem seviyesinde kesen JS fonksiyonu
+        async function killNetworkProcess(pid) {
+            if (!confirm(`PID ${pid} numaralı işlemin ağ bacağını kırıp uygulamayı kapatmak istediğinize emin misiniz?`)) {
+                return;
+            }
+            try {
+                const response = await fetch('/kill_network_process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pid: pid })
+                });
+                const data = await response.json();
+                alert(data.message);
+                loadNetworkList(); // Listeyi otomatik yenile
+            } catch(e) {
+                alert("Bağlantı kesme işlemi başarısız oldu.");
             }
         }
     </script>
