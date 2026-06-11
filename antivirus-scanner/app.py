@@ -234,7 +234,7 @@ def action():
         return jsonify({"success": False, "message": f"Hata: {str(e)}"})
 
 # --- BURAYA KENDİ API ANAHTARINI YAPIŞTIR ---
-VT_API_KEY = "77fb2b0529c6c8330521e3a1d81cb8300194baf0c5c1a61cd90492e732ff52f"
+VT_API_KEY = "77fb2b0529c6c8330521e3a1d81cb8300194baf0c5c1a61cd90492e732ff52f3"
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
