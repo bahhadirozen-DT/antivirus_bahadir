@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCHEKUR Yerel Siber Güvenlik Laboratuvarı</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { background-color: #161b22; border: 1px solid #30363d; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .card-header { background-color: #21262d; border-bottom: 1px solid #30363d; font-weight: bold; color: #58a6ff; }
+        .btn-primary { background-color: #1f6feb; border: none; }
+        .btn-primary:hover { background-color: #388bfd; }
+        .btn-warning { background-color: #d29922; color: #0d1117; border: none; }
+        .btn-danger { background-color: #da3633; border: none; }
+        .list-group-item { background-color: #161b22; border: 1px solid #30363d; color: #c9d1d9; margin-bottom: 5px; border-radius: 6px; }
+        .badge-clean { background-color: #238636; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+        .badge-warning { background-color: #9e6a00; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+        .badge-danger { background-color: #da3633; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+        .navbar { background-color: #161b22; border-bottom: 1px solid #30363d; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark px-4">
+    <span class="navbar-brand mb-0 h1 text-info">🛡️ SCHEKUR Siber Güvenlik Laboratuvarı (Lokal)</span>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">📂 Downloads Klasörü Dosya Tarama Motoru</div>
+                <div class="card-body text-center">
+                    <p>Bilgisayarınızın İndirilenler dizinindeki scriptleri ve zararlı imzaları denetleyin.</p>
+                    <button class="btn btn-primary btn-lg w-100" id="taramaButon" onclick="taramaBaslat()">🚀 Jet Hızında Dosya Tara</button>
+                    <div id="yukleniyor" class="mt-3 text-warning" style="display:none;">🔎 Dosyalar derinlemesine inceleniyor, lütfen bekleyin...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>🌐 Canlı Ağ İzleme (Dış Bağlantı Dedektörü)</span>
+                    <button class="btn btn-sm btn-outline-info" onclick="agTaramasiYap()">🔄 Yenile</button>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Bilgisayarınıza dışarıdan kurulmuş veya dışarıya giden aktif IP bağlantılarını listeler.</p>
+                    <ul class="list-group" id="agSonucListesi">
+                        <li class="list-group-item text-center text-muted">Yenile butonuna basarak ağ trafiğini kontrol edin.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="sonucOzet">📊 Tarama Sonuç Raporu</div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="list-group" id="sonucListesi">
+                        <li class="list-group-item text-center text-muted">Tarama sonuçları burada listelenecek.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header text-warning">☣️ Karantina Yönetim Merkezi</div>
+                <div class="card-body">
+                    <p class="small text-muted">Sistemden tamamen yalıtılmış dosyalar:</p>
+                    <ul class="list-group" id="karantinaListesi">
+                        <li class="list-group-item text-center text-muted">Karantina şu an boş.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    karantinaListele();
+    agTaramasiYap();
+});
+
+function taramaBaslat() {
+    document.getElementById("yukleniyor").style.display = "block";
+    document.getElementById("taramaButon").disabled = true;
+    
+    fetch('/tarama', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("yukleniyor").style.display = "none";
+        document.getElementById("taramaButon").disabled = false;
+        
+        document.getElementById("sonucOzet").innerText = `✅ Tarama ${data.gecen_sure} saniyede bitti! Toplam ${data.toplam_dosya} dosya incelendi.`;
+        
+        let liste = document.getElementById("sonucListesi");
+        liste.innerHTML = "";
+        
+        data.sonuclar.forEach(item => {
+            let li = document.createElement("li");
+            li.className = "list-group-item d-flex justify-content-between align-items-center";
+            
+            let icerik = "";
+            if(item.durum === "TEMİZ") {
+                icerik = `<span>✔️ <span class="badge badge-clean">TEMİZ</span> ${item.dosya}</span>`;
+            } else if(item.durum === "ŞÜPHELİ") {
+                icerik = `<span>⚠️ <span class="badge badge-warning">ŞÜPHELİ SCRIPT</span> ${item.dosya} -> <small class="text-warning">${item.mesaj}</small></span>
+                          <div>
+                            <button class="btn btn-sm btn-warning me-1" onclick="karantinayaAl('${item.dosya.replace(/\\/g, '\\\\')}')">Karantina</button>
+                          </div>`;
+            } else if(item.durum === "TEHLİKE") {
+                icerik = `<span>🚨 <span class="badge badge-danger">TEHLİKE</span> ${item.dosya} -> <small class="text-danger">${item.mesaj}</small></span>
+                          <div>
+                            <button class="btn btn-sm btn-danger me-1" onclick="karantinayaAl('${item.dosya.replace(/\\/g, '\\\\')}')">Karantina</button>
+                          </div>`;
+            }
+            
+            li.innerHTML = icerik;
+            liste.appendChild(li);
+        });
+    });
+}
+
+function agTaramasiYap() {
+    let agListe = document.getElementById("agSonucListesi");
+    agListe.innerHTML = `<li class="list-group-item text-center text-info">Ağ trafiği analiz ediliyor...</li>`;
+    
+    fetch('/ag_taramasi')
+    .then(res => res.json())
+    .then(data => {
+        agListe.innerHTML = "";
+        if(!data.baglantilar || data.baglantilar.length === 0) {
+            agListe.innerHTML = `<li class="list-group-item text-center text-success">✔️ Dışarıdan bağlanan aktif yabancı IP bağlantısı tespit edilmedi.</li>`;
+            return;
+        }
+        
+        data.baglantilar.forEach(bag => {
+            let li = document.createElement("li");
+            li.className = "list-group-item d-flex justify-content-between align-items-center border-danger";
+            li.innerHTML = `<span>⚡ <b>${bag.program}</b> (PID: ${bag.pid}) -> Dış IP: <span class="text-danger">${bag.ip}:${bag.port}</span></span>
+                            <span class="badge bg-danger">AKTİF BAĞLANTI</span>`;
+            agListe.appendChild(li);
+        });
+    });
+}
+
+function karantinayaAl(yol) {
+    fetch('/karantina', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ dosya_yolu: yol })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.durum === "basarili") {
+            karantinaListele();
+            taramaBaslat();
+        } else {
+            alert("Hata: " + data.mesaj);
+        }
+    });
+}
+
+function karantinaListele() {
+    fetch('/karantina_listesi')
+    .then(res => res.json())
+    .then(data => {
+        let kListe = document.getElementById("karantinaListesi");
+        kListe.innerHTML = "";
+        
+        let keys = Object.keys(data);
+        if(keys.length === 0) {
+            kListe.innerHTML = `<li class="list-group-item text-center text-muted">Karantina şu an boş.</li>`;
+            return;
+        }
+        
+        keys.forEach(anahtar => {
+            let li = document.createElement("li");
+            li.className = "list-group-item d-flex flex-column align-items-start";
+            li.innerHTML = `<b class="text-danger">📦 ${anahtar}</b>
+                            <small class="text-muted" style="font-size:11px;">Konum: ${data[anahtar]}</small>`;
+            kListe.appendChild(li);
+        });
+    });
+}
+</script>
+</body>
+</html>
