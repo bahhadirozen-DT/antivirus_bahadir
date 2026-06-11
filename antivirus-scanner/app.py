@@ -5,7 +5,8 @@ import requests
 import time
 import json
 import base64
-from flask import Flask, render_template_string, request, jsonify
+from flask import Flask, render_template, request, jsonify
+import psutil  # Dış bağlantıları anlık yakalamak için entegre edildi
 
 app = Flask(__name__)
 
@@ -61,220 +62,9 @@ def analyze_pdf_content(file_path):
         pass
     return False, ""
 
-# --- GELİŞMİŞ ARAYÜZ (Yeni Karantina Paneli Dahil) ---
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>🛡️ Hibrit Pro Antivirüs</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 40px; color: #333; }
-        .container { max-width: 1000px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        input[type="text"] { width: 70%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px; }
-        button { padding: 12px 24px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
-        button:hover { background-color: #0056b3; }
-        .btn-delete { background-color: #dc3545; font-size: 12px; padding: 6px 12px; margin-left: 10px; color: white; border: none; border-radius:3px; cursor:pointer;}
-        .btn-quarantine { background-color: #ffc107; color: black; font-size: 12px; padding: 6px 12px; margin-left: 5px; border: none; border-radius:3px; cursor:pointer; font-weight: bold;}
-        .btn-vt { background-color: #6f42c1; color: white; font-size: 12px; padding: 6px 12px; margin-left: 5px; border: none; border-radius:3px; cursor:pointer;}
-        .btn-restore { background-color: #28a745; color: white; font-size: 12px; padding: 6px 12px; border: none; border-radius:3px; cursor:pointer; font-weight: bold;}
-        #results { margin-top: 20px; max-height: 400px; overflow-y: auto; border-top: 2px solid #eee; padding-top: 10px; }
-        .clean { color: #155724; background: #d4edda; margin: 5px 0; padding: 10px; border-radius:4px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-        .danger { color: #721c24; background: #f8d7da; font-weight: bold; margin: 5px 0; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .warning { color: #856404; background: #fff3cd; font-weight: bold; margin: 5px 0; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Karantina Bölümü Stilleri */
-        .quarantine-section { max-width: 1000px; background: #e9ecef; padding: 25px; border-radius: 8px; border: 1px solid #ced4da; }
-        .quarantine-item { background: white; padding: 12px; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🛡️ Hibrit Antivirüs Motoru (Pro Sürüm)</h1>
-        <p>Klasör yolunu girin. Sistem imza taraması yaparken, <b>PDF dosyalarını gömülü script/makro risklerine karşı</b> derinlemesine inceler:</p>
-        
-        <input type="text" id="folderPath" placeholder="Örn: C:\\Users\\Asus\\Downloads">
-        <button onclick="startScan()">⚡ Derinlemesine Tara</button>
-
-        <h3 id="status"></h3>
-        <div id="results"></div>
-    </div>
-
-    <div class="quarantine-section">
-        <h2>☣️ Karantina Yönetim Merkezi</h2>
-        <p>Karantinaya taşınan tehditleri buradan yönetebilir, güvenli olduğunu bildiğiniz dosyaları eski yerlerine iade edebilirsiniz.</p>
-        <button onclick="loadQuarantineList()" style="background-color: #6c757d; padding: 8px 16px; font-size: 14px; margin-bottom: 15px;">🔄 Listeyi Yenile</button>
-        <div id="quarantineList"><p style="color: #6c757d;">Yükleniyor veya karantina boş...</p></div>
-    </div>
-
-    <script>
-        // Sayfa ilk açıldığında karantina listesini yükle
-        window.onload = function() {
-            loadQuarantineList();
-        };
-
-        async function startScan() {
-            const path = document.getElementById('folderPath').value;
-            const statusText = document.getElementById('status');
-            const resultsDiv = document.getElementById('results');
-            
-            if (!path) { alert("Lütfen bir klasör yolu girin!"); return; }
-            statusText.innerText = "⚡ Klasör derinlemesine analiz ediliyor, lütfen bekleyin...";
-            resultsDiv.innerHTML = "";
-
-            try {
-                const response = await fetch('/scan', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path: path })
-                });
-                
-                if (!response.ok) {
-                    statusText.innerText = "❌ Sunucu yanıt vermedi veya klasör okunamadı.";
-                    return;
-                }
-
-                const data = await response.json();
-                statusText.innerText = `✅ Tarama ${data.duration} saniyede bitti! Toplam ${data.total_scanned} dosya incelendi.`;
-                
-                data.results.forEach((item, index) => {
-                    const p = document.createElement('p');
-                    const encodedPath = btoa(unescape(encodeURIComponent(item.file)));
-                    
-                    if (item.status === 'INFECTED') {
-                        p.className = 'danger';
-                        p.id = `row-${index}`;
-                        p.innerHTML = `
-                            <span>🚨 [TEHLİKE] ${item.file} -> VİRÜS: ${item.malware}</span>
-                            <div>
-                                <button class="btn-quarantine" onclick="actionFile('quarantine', '${encodedPath}', 'row-${index}')">Karantina</button>
-                                <button class="btn-delete" onclick="actionFile('delete', '${encodedPath}', 'row-${index}')">Sil</button>
-                            </div>
-                        `;
-                    } else if (item.status === 'SUSPICIOUS') {
-                        p.className = 'warning';
-                        p.id = `row-${index}`;
-                        p.innerHTML = `
-                            <span>⚠️ [ŞÜPHELİ SCRIPT] ${item.file} -> Tetikleyiciler: ${item.details}</span>
-                            <div>
-                                <button class="btn-quarantine" onclick="actionFile('quarantine', '${encodedPath}', 'row-${index}')">Karantina</button>
-                                <button class="btn-delete" onclick="actionFile('delete', '${encodedPath}', 'row-${index}')">Sil</button>
-                            </div>
-                        `;
-                    } else {
-                        p.className = 'clean';
-                        p.id = `row-${index}`;
-                        p.innerHTML = `
-                            <span>✔️ [TEMİZ] ${item.file}</span>
-                            <button class="btn-vt" onclick="checkVT('${item.hash}', 'row-${index}')">Bulutta Sorgula (VirusTotal)</button>
-                        `;
-                    }
-                    resultsDiv.appendChild(p);
-                });
-            } catch (error) { 
-                statusText.innerText = "❌ Zaman aşımı veya sunucu bağlantı hatası."; 
-            }
-        }
-
-        async function checkVT(fileHash, rowId) {
-            const row = document.getElementById(rowId);
-            row.style.opacity = "0.5";
-            try {
-                const response = await fetch('/check_vt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ hash: fileHash })
-                });
-                const data = await response.json();
-                row.style.opacity = "1";
-
-                if (data.status === 'INFECTED') {
-                    row.className = 'danger';
-                    row.innerHTML = `<span>🚨 [BULUTTA YAKALANDI] -> VİRÜS: ${data.malware}</span>`;
-                } else {
-                    alert("✨ Temiz! Devasa VirusTotal veri tabanında da bu dosya güvenli çıktı.");
-                }
-            } catch (e) {
-                row.style.opacity = "1";
-                alert("VirusTotal sorgusu esnasında bir hata oluştu.");
-            }
-        }
-
-        async function actionFile(action, encodedPath, rowId) {
-            try {
-                const response = await fetch('/action', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: action, path: encodedPath })
-                });
-                const data = await response.json();
-                alert(data.message);
-                if(data.success) {
-                    document.getElementById(rowId).style.backgroundColor = "#e2e3e5";
-                    document.getElementById(rowId).style.color = "#383d41";
-                    document.getElementById(rowId).innerHTML = `✅ İşlem tamamlandı.`;
-                    loadQuarantineList(); // Karantina listesini canlı güncelle
-                }
-            } catch(e) {
-                alert("İşlem gerçekleştirilemedi.");
-            }
-        }
-
-        // Karantina listesini arka plandan çeker ve ekrana basar
-        async function loadQuarantineList() {
-            const qListDiv = document.getElementById('quarantineList');
-            try {
-                const response = await fetch('/quarantine_list');
-                const data = await response.json();
-                
-                if (data.length === 0) {
-                    qListDiv.innerHTML = "<p style='color: #6c757d;'>Karantina bölgesi şu an tertemiz. Tehdit bulunmuyor.</p>";
-                    return;
-                }
-                
-                qListDiv.innerHTML = "";
-                data.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'quarantine-item';
-                    div.innerHTML = `
-                        <div>
-                            <strong>📄 Dosya Adı:</strong> ${item.filename}<br>
-                            <small style="color: #6c757d;">Orijinal Konum: ${item.orig_path}</small>
-                        </div>
-                        <div>
-                            <button class="btn-restore" onclick="manageQuarantine('restore', '${item.id}')">Geri Yükle</button>
-                            <button class="btn-delete" onclick="manageQuarantine('permanent_delete', '${item.id}')">Kalıcı Sil</button>
-                        </div>
-                    `;
-                    qListDiv.appendChild(div);
-                });
-            } catch(e) {
-                qListDiv.innerHTML = "<p style='color: red;'>Karantina listesi yüklenirken hata oluştu.</p>";
-            }
-        }
-
-        async function manageQuarantine(action, fileId) {
-            try {
-                const response = await fetch('/manage_quarantine', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: action, id: fileId })
-                });
-                const data = await response.json();
-                alert(data.message);
-                loadQuarantineList();
-            } catch(e) {
-                alert("Karantina işlemi başarısız.");
-            }
-        }
-    </script>
-</body>
-</html>
-"""
-
 @app.route('/')
 def home():
-    return render_template_string(HTML_TEMPLATE)
+    return render_template('index.html')
 
 @app.route('/scan', methods=['POST'])
 def scan():
@@ -322,6 +112,35 @@ def scan():
             
     duration = round(time.time() - start_time, 2)
     return jsonify({"results": scan_results, "total_scanned": len(scan_results), "duration": duration})
+
+@app.route('/ag_taramasi', methods=['GET'])
+def ag_baglantilarini_tara():
+    """Bilgisayara dışarıdan kurulan aktif ağ bağlantılarını yakalar"""
+    aktif_baglantilar = []
+    try:
+        for baglanti in psutil.net_connections(kind='inet'):
+            if baglanti.status == 'ESTABLISHED':
+                uzak_ip = baglanti.raddr.ip if baglanti.raddr else None
+                uzak_port = baglanti.raddr.port if baglanti.raddr else None
+                
+                # Sadece gerçek dış ağ trafiğini al (Localhost'u gizle)
+                if uzak_ip and uzak_ip != "127.0.0.1" and uzak_ip != "::1":
+                    pid = baglanti.pid
+                    try:
+                        program_adi = psutil.Process(pid).name()
+                    except Exception:
+                        program_adi = "Bilinmeyen Program"
+                        
+                    aktif_baglantilar.append({
+                        "program": program_adi,
+                        "pid": pid,
+                        "ip": uzak_ip,
+                        "port": uzak_port
+                    })
+    except Exception as e:
+        return jsonify({"hata": str(e)}), 500
+        
+    return jsonify({"baglantilar": aktif_baglantilar})
 
 @app.route('/check_vt', methods=['POST'])
 def check_vt():
@@ -372,7 +191,6 @@ def action():
             file_name = os.path.basename(file_path)
             dest_path = os.path.join(QUARANTINE_DIR, f"{file_id}_{file_name}")
             
-            # Orijinal konumu veri tabanına kaydet
             db = load_quarantine_db()
             db[file_id] = {
                 "id": file_id,
@@ -382,7 +200,6 @@ def action():
             }
             save_quarantine_db(db)
             
-            # Dosyayı taşı
             shutil.move(file_path, dest_path)
             return jsonify({"success": True, "message": "Dosya karantinaya güvenle taşındı!"})
     except Exception as e:
@@ -393,7 +210,6 @@ def action():
 @app.route('/quarantine_list', methods=['GET'])
 def quarantine_list():
     db = load_quarantine_db()
-    # Sadece fiziksel olarak gerçekten karantinada duran dosyaları listele
     valid_list = []
     for k, v in db.items():
         if os.path.exists(v["quarantine_path"]):
@@ -417,7 +233,6 @@ def manage_quarantine():
     try:
         if action_type == 'restore':
             if os.path.exists(q_path):
-                # Orijinal klasör silindiyse geri yüklemek için yeniden oluştur
                 orig_dir = os.path.dirname(orig_path)
                 if not os.path.exists(orig_dir):
                     os.makedirs(orig_dir)
