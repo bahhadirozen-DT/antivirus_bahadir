@@ -6,7 +6,7 @@ import time
 import json
 import base64
 from flask import Flask, render_template, request, jsonify
-import psutil  # Dış bağlantıları anlık yakalamak için entegre edildi
+import psutil  # Dış bağlantıları anlık yakalamak ve yönetmek için entegre edildi
 
 app = Flask(__name__)
 
@@ -18,7 +18,20 @@ DB_FILE = os.path.join(QUARANTINE_DIR, "karantina_kayitlari.json")
 if not os.path.exists(QUARANTINE_DIR):
     os.makedirs(QUARANTINE_DIR)
 
-# Karantina geçmişini tutan basit JSON veri tabanı fonksiyonları
+# --- YAPAY ZEKA AĞ ANALİZ SÖZLÜĞÜ ---
+SAFE_KEYWORDS = {
+    'chrome.exe': 'Google Chrome tarayıcı trafiği. Standart güvenli internet sörfü veya arka plan senkronizasyonu.',
+    'onedrive.exe': 'Microsoft OneDrive bulut senkronizasyonu. Klasör yedekleme ve veri transferi yapar.',
+    'onedrive.sync.service.exe': 'Microsoft Bulut altyapısı entegre veri senkronizasyon mekanizması.',
+    'filecoauth.exe': 'Microsoft Office / OneDrive ortak çalışma ve dosya eşitleme motoru.',
+    'thunderbird.exe': 'Mozilla Thunderbird e-posta istemcisi. Güvenli IMAP/POP3 protokolleri üzerinden mailleri kontrol eder.',
+    'mscopilot.exe': 'Microsoft Copilot yapay zeka entegrasyonu. Güvenli Azure bulut sunucularıyla konuşur.',
+    'svchost.exe': 'Kritik Windows sistem işlemi. Güvenli Microsoft servis bacakları veya telemetri sistemidir.',
+    'msedge.exe': 'Microsoft Edge tarayıcı trafiği. Standart güvenli HTTPS veri akışı.',
+    'discord.exe': 'Discord sohbet istemcisi. Sunucu ses ve metin odaları senkronizasyonu.',
+    'spotify.exe': 'Spotify müzik akışı. Medya sunucularından anlık ses paketleri çeker.'
+}
+
 def load_quarantine_db():
     if os.path.exists(DB_FILE):
         try:
@@ -50,7 +63,6 @@ def calculate_sha256(file_path):
 
 # --- PDF MAKRO / SCRIPT ANALİZ MOTORU ---
 def analyze_pdf_content(file_path):
-    """PDF içinde gizlenmiş otomatik tetiklenen script veya tehlikeli etiketleri arar"""
     dangerous_tags = [b"/JavaScript", b"/JS", b"/AA", b"/Launch", b"/OpenAction"]
     try:
         with open(file_path, "rb") as f:
@@ -62,6 +74,26 @@ def analyze_pdf_content(file_path):
         pass
     return False, ""
 
+# --- YAPAY ZEKA AĞ DEĞERLENDİRME MOTORU ---
+def ai_analyze_connection(program_name, remote_ip, remote_port):
+    """Gelen bağlantıyı siber güvenlik gözlüğüyle yorumlar."""
+    prog_lower = program_name.lower()
+    
+    for key, desc in SAFE_KEYWORDS.items():
+        if key in prog_lower:
+            if remote_port == 443:
+                return "GÜVENLİ", f"{desc} Port 443 (HTTPS) şifreli tüneli kullandığı için harici sızmalara karşı korumalıdır."
+            elif remote_port in [993, 465, 995]:
+                return "GÜVENLİ", f"{desc} Standart kriptolu e-posta haberleşme portu üzerinden veri alıyor."
+            else:
+                return "DİKKAT", f"{desc} Ancak standart dışı bir ağ kapısından ({remote_port}) veri akışı sağlıyor. Kontrol edilmeli."
+                
+    if remote_port in [4444, 8080, 31337, 5555]:
+        return "TEHLİKELİ", f"Kritik Port İkazı! {program_name} uygulaması, trojan ve arka kapı (backdoor) yazılımlarının kullandığı tehlikeli bir port üzerinden dış dünyaya açılmaya çalışıyor!"
+        
+    return "BİLİNMİYOR", f"{program_name} uygulaması {remote_ip}:{remote_port} adresine bağlantı kurdu. Bu yazılım güvenli beyaz listemizde yer almıyor, eğer sizin bilginiz dışında açıldıysa şüpheli olabilir."
+
+# --- FLASK BAĞLANTI NOKTALARI (ROTALAR) ---
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -80,8 +112,6 @@ def scan():
         for file in files:
             try:
                 file_path = os.path.join(root, file)
-                
-                # Karantina klasörünün kendisini taratmayalım
                 if QUARANTINE_DIR in file_path:
                     continue
                     
@@ -89,13 +119,11 @@ def scan():
                 if file_hash is None:
                     continue
 
-                # 1. Kural: Yerel Zararlı İmzası Kontrolü
                 if file_hash in LOCAL_SIGNATURES:
                     scan_results.append({
                         "file": file_path, "status": "INFECTED", 
                         "malware": LOCAL_SIGNATURES[file_hash], "hash": file_hash
                     })
-                # 2. Kural: PDF İçerik ve Makro Analizi
                 elif file.lower().endswith('.pdf'):
                     is_suspicious, tags_found = analyze_pdf_content(file_path)
                     if is_suspicious:
@@ -115,7 +143,7 @@ def scan():
 
 @app.route('/ag_taramasi', methods=['GET'])
 def ag_baglantilarini_tara():
-    """Bilgisayara dışarıdan kurulan aktif ağ bağlantılarını yakalar"""
+    """Canlı ağ bağlantılarını yakalar, AI analiz motorundan geçirip arayüze basar"""
     aktif_baglantilar = []
     try:
         for baglanti in psutil.net_connections(kind='inet'):
@@ -123,7 +151,6 @@ def ag_baglantilarini_tara():
                 uzak_ip = baglanti.raddr.ip if baglanti.raddr else None
                 uzak_port = baglanti.raddr.port if baglanti.raddr else None
                 
-                # Sadece gerçek dış ağ trafiğini al (Localhost'u gizle)
                 if uzak_ip and uzak_ip != "127.0.0.1" and uzak_ip != "::1":
                     pid = baglanti.pid
                     try:
@@ -131,16 +158,38 @@ def ag_baglantilarini_tara():
                     except Exception:
                         program_adi = "Bilinmeyen Program"
                         
+                    # Burada devreye yapay zeka analiz motorumuz giriyor:
+                    durum, ai_acıklama = ai_analyze_connection(program_adi, uzak_ip, uzak_port)
+                        
                     aktif_baglantilar.append({
                         "program": program_adi,
                         "pid": pid,
                         "ip": uzak_ip,
-                        "port": uzak_port
+                        "port": uzak_port,
+                        "status": durum,        # GÜVENLİ, DİKKAT, TEHLİKELİ
+                        "analysis": ai_acıklama  # Yapay zekanın gerekçeli yorumu
                     })
     except Exception as e:
         return jsonify({"hata": str(e)}), 500
         
     return jsonify({"baglantilar": aktif_baglantilar})
+
+@app.route('/kill_network_process', methods=['POST'])
+def kill_network_process():
+    """Seçilen şüpheli ağ bağlantısını işletim sistemi seviyesinde keser."""
+    data = request.get_json()
+    pid = data.get('pid')
+    try:
+        process = psutil.Process(int(pid))
+        proc_name = process.name()
+        process.terminate()  # Program bacağını sonlandırır
+        return jsonify({"success": True, "message": f"{proc_name} (PID: {pid}) ağ bağlantısı zorla kesildi ve işlem sonlandırıldı."})
+    except psutil.NoSuchProcess:
+        return jsonify({"success": False, "message": "Bu işlem zaten sonlandırılmış."})
+    except psutil.AccessDenied:
+        return jsonify({"success": False, "message": "Yetki Hatası: Bu bağlantıyı kesebilmek için terminali Yönetici Olarak çalıştırmalısınız!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Hata oluştu: {str(e)}"})
 
 @app.route('/check_vt', methods=['POST'])
 def check_vt():
@@ -204,8 +253,6 @@ def action():
             return jsonify({"success": True, "message": "Dosya karantinaya güvenle taşındı!"})
     except Exception as e:
         return jsonify({"success": False, "message": f"Hata: {str(e)}"})
-
-# --- KARANTİNA YÖNETİM API UÇLARI ---
 
 @app.route('/quarantine_list', methods=['GET'])
 def quarantine_list():
