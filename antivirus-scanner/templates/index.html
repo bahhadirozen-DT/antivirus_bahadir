@@ -4,63 +4,192 @@
     <meta charset="UTF-8">
     <title>🛡️ SCHEKUR Hibrit Pro Antivirüs</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0d1117; margin: 40px; color: #c9d1d9; }
-        .container { max-width: 1100px; background: #161b22; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 30px; border: 1px solid #30363d; }
-        input[type="text"] { width: 70%; padding: 12px; font-size: 16px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: white; }
-        button { padding: 12px 24px; font-size: 16px; background-color: #1f6feb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
-        button:hover { background-color: #388bfd; }
-        .btn-delete { background-color: #da3633; font-size: 12px; padding: 6px 12px; margin-left: 10px; color: white; border: none; border-radius:3px; cursor:pointer;}
-        .btn-quarantine { background-color: #d29922; color: black; font-size: 12px; padding: 6px 12px; margin-left: 5px; border: none; border-radius:3px; cursor:pointer; font-weight: bold;}
-        .btn-vt { background-color: #8957e5; color: white; font-size: 12px; padding: 6px 12px; margin-left: 5px; border: none; border-radius:3px; cursor:pointer;}
-        .btn-restore { background-color: #238636; color: white; font-size: 12px; padding: 6px 12px; border: none; border-radius:3px; cursor:pointer; font-weight: bold;}
-        #results { margin-top: 20px; max-height: 400px; overflow-y: auto; border-top: 1px solid #30363d; padding-top: 10px; }
-        .clean { color: #58a6ff; background: #21262d; margin: 5px 0; padding: 10px; border-radius:4px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #238636; }
-        .danger { color: #f85149; background: #21262d; font-weight: bold; margin: 5px 0; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #da3633; }
-        .warning { color: #d29922; background: #21262d; font-weight: bold; margin: 5px 0; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #d29922; }
-        
-        /* Karantina ve Ağ Bölümü Stilleri */
-        .quarantine-section, .network-section { max-width: 1100px; background: #161b22; padding: 25px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 30px; }
-        .quarantine-item { background: #0d1117; padding: 12px; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.5); border-top: 1px solid #30363d; border-right: 1px solid #30363d; border-bottom: 1px solid #30363d;}
-        
-        /* Dinamik Ağ Analiz Kartları */
-        .network-item { background: #0d1117; padding: 15px; margin: 10px 0; border-radius: 6px; border: 1px solid #30363d; box-shadow: 0 2px 5px rgba(0,0,0,0.4); }
-        .net-GÜVENLİ { border-left: 5px solid #238636; }
-        .net-DİKKAT { border-left: 5px solid #d29922; }
-        .net-TEHLİKELİ { border-left: 5px solid #f85149; }
-        .net-BİLİNMİYOR { border-left: 5px solid #8b949e; }
-        
-        .ai-box { background: #161b22; padding: 8px 12px; margin-top: 8px; border-radius: 4px; border: 1px solid #21262d; font-size: 13px; color: #8b949e; line-height: 1.4; }
-        .badge-GÜVENLİ { background: #238636; color: white; }
-        .badge-DİKKAT { background: #d29922; color: black; }
-        .badge-TEHLİKELİ { background: #f85149; color: white; }
-        .badge-BİLİNMİYOR { background: #8b949e; color: white; }
-        .net-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #0d1117;
+            margin: 40px;
+            color: #c9d1d9;
+        }
+        .container {
+            max-width: 1100px;
+            background: #161b22;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            border: 1px solid #30363d;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: white;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #1f6feb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #388bfd;
+        }
+        .btn-delete {
+            background-color: #da3633;
+            font-size: 12px;
+            padding: 6px 12px;
+            margin-left: 10px;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-quarantine {
+            background-color: #d29922;
+            color: black;
+            font-size: 12px;
+            padding: 6px 12px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-vt {
+            background-color: #8957e5;
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-restore {
+            background-color: #238636;
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #results {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border-top: 1px solid #30363d;
+            padding-top: 10px;
+        }
+        .clean {
+            color: #58a6ff;
+            background: #21262d;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #238636;
+        }
+        .danger {
+            color: #f85149;
+            background: #21262d;
+            font-weight: bold;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #da3633;
+        }
+        .warning {
+            color: #d29922;
+            background: #21262d;
+            font-weight: bold;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #d29922;
+        }
+        .quarantine-section {
+            max-width: 1100px;
+            background: #161b22;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+        .quarantine-item {
+            background: #0d1117;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #ffc107;
+            border: 1px solid #30363d;
+        }
+        .network-section {
+            max-width: 1100px;
+            background: #161b22;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+        .network-item {
+            background: #0d1117;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+        .ai-box {
+            background: #161b22;
+            padding: 8px 12px;
+            margin-top: 8px;
+            border-radius: 4px;
+            border: 1px solid #21262d;
+            font-size: 13px;
+            color: #8b949e;
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
         <h1>🛡️ SCHEKUR Hibrit Antivirüs Motoru (Pro Sürüm)</h1>
-        <p>Klasör yolunu girin. Sistem imza taraması yaparken, <b>PDF dosyalarını gömülü script/makro risklerine karşı</b> derinlemesine inceler:</p>
-        
         <input type="text" id="folderPath" placeholder="Örn: C:\\Users\\Asus\\Downloads">
         <button onclick="startScan()">⚡ Derinlemesine Tara</button>
-
         <h3 id="status" style="color: #58a6ff;"></h3>
         <div id="results"></div>
     </div>
 
     <div class="network-section">
-        <h2>🌐 Canlı Ağ İzleme (Dış Bağlantı Dedektörü)</h2>
-        <p>Bilgisayarınıza dışarıdan kurulmuş veya arka planda dışarıya sızmaya çalışan tüm aktif yabancı IP bağlantılarını listeler.</p>
-        <button onclick="loadNetworkList()" style="background-color: #21262d; color: #58a6ff; border: 1px solid #30363d; padding: 8px 16px; font-size: 14px; margin-bottom: 15px; border-radius: 4px; cursor: pointer;">🔄 Ağ Trafiğini Denetle</button>
-        <div id="networkList"><p style="color: #8b949e;">Yükleniyor veya harici bağlantı aranıyor...</p></div>
+        <h2>🌐 Canlı Ağ İzleme</h2>
+        <button onclick="loadNetworkList()">🔄 Ağ Trafiğini Denetle</button>
+        <div id="networkList"></div>
     </div>
 
     <div class="quarantine-section">
         <h2>☣️ Karantina Yönetim Merkezi</h2>
-        <p>Karantinaya taşınan tehditleri buradan yönetebilir, güvenli olduğunu bildiğiniz dosyaları eski yerlerine iade edebilirsiniz.</p>
-        <button onclick="loadQuarantineList()" style="background-color: #21262d; color: #58a6ff; border: 1px solid #30363d; padding: 8px 16px; font-size: 14px; margin-bottom: 15px; border-radius: 4px; cursor: pointer;">🔄 Listeyi Yenile</button>
-        <div id="quarantineList"><p style="color: #8b949e;">Yükleniyor veya karantina boş...</p></div>
+        <button onclick="loadQuarantineList()">🔄 Listeyi Yenile</button>
+        <div id="quarantineList"></div>
     </div>
 
     <script>
@@ -70,220 +199,137 @@
         };
 
         async function startScan() {
-            const path = document.getElementById('folderPath').value;
-            const statusText = document.getElementById('status');
-            const resultsDiv = document.getElementById('results');
+            var path = document.getElementById('folderPath').value;
+            var statusText = document.getElementById('status');
+            var resultsDiv = document.getElementById('results');
             
-            if (!path) { alert("Lütfen bir klasör yolu girin!"); return; }
-            statusText.innerText = "⚡ Klasör derinlemesine analiz ediliyor, lütfen bekleyin...";
+            if (!path) {
+                alert("Lütfen bir klasör yolu girin!");
+                return;
+            }
+
+            statusText.innerText = "⚡ Analiz ediliyor...";
             resultsDiv.innerHTML = "";
 
             try {
-                const response = await fetch('/scan', {
+                var response = await fetch('/scan', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ path: path })
                 });
+                var data = await response.json();
                 
-                if (!response.ok) {
-                    statusText.innerText = "❌ Sunucu yanıt vermedi veya klasör okunamadı.";
-                    return;
-                }
+                statusText.innerText = "✅ Tarama bitti! " + data.total_scanned + " dosya incelendi.";
 
-                const data = await response.json();
-                statusText.innerText = `✅ Tarama ${data.duration} saniyede bitti! Toplam ${data.total_scanned} dosya incelendi.`;
-                
-                data.results.forEach((item, index) => {
-                    const p = document.createElement('p');
-                    const encodedPath = btoa(unescape(encodeURIComponent(item.file)));
+                for (var i = 0; i < data.results.length; i++) {
+                    var item = data.results[i];
+                    var p = document.createElement('p');
+                    var encodedPath = btoa(unescape(encodeURIComponent(item.file)));
                     
                     if (item.status === 'INFECTED') {
                         p.className = 'danger';
-                        p.id = `row-${index}`;
-                        p.innerHTML = `
-                            <span>🚨 [TEHLİKE] ${item.file} -> VİRÜS: ${item.malware}</span>
-                            <div>
-                                <button class="btn-quarantine" onclick="actionFile('quarantine', '${encodedPath}', 'row-${index}')">Karantina</button>
-                                <button class="btn-delete" onclick="actionFile('delete', '${encodedPath}', 'row-${index}')">Sil</button>
-                            </div>
-                        `;
                     } else if (item.status === 'SUSPICIOUS') {
                         p.className = 'warning';
-                        p.id = `row-${index}`;
-                        p.innerHTML = `
-                            <span>⚠️ [ŞÜPHELİ SCRIPT] ${item.file} -> Tetikleyiciler: ${item.details}</span>
-                            <div>
-                                <button class="btn-quarantine" onclick="actionFile('quarantine', '${encodedPath}', 'row-${index}')">Karantina</button>
-                                <button class="btn-delete" onclick="actionFile('delete', '${encodedPath}', 'row-${index}')">Sil</button>
-                            </div>
-                        `;
                     } else {
                         p.className = 'clean';
-                        p.id = `row-${index}`;
-                        p.innerHTML = `
-                            <span>✔️ [TEMİZ] ${item.file}</span>
-                            <button class="btn-vt" onclick="checkVT('${item.hash}', 'row-${index}')">Bulutta Sorgula (VirusTotal)</button>
-                        `;
                     }
+                    
+                    p.id = 'row-' + i;
+                    p.innerHTML = "<span>" + item.status + ": " + item.file + "</span>" +
+                                  "<div>" +
+                                  "<button class='btn-quarantine' onclick='actionFile(\"quarantine\", \"" + encodedPath + "\", \"row-" + i + "\")'>Karantina</button>" +
+                                  "<button class='btn-delete' onclick='actionFile(\"delete\", \"" + encodedPath + "\", \"row-" + i + "\")'>Sil</button>" +
+                                  "</div>";
                     resultsDiv.appendChild(p);
-                });
-            } catch (error) { 
-                statusText.innerText = "❌ Zaman aşımı veya sunucu bağlantı hatası."; 
-            }
-        }
-
-        async function checkVT(fileHash, rowId) {
-            const row = document.getElementById(rowId);
-            row.style.opacity = "0.5";
-            try {
-                const response = await fetch('/check_vt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ hash: fileHash })
-                });
-                const data = await response.json();
-                row.style.opacity = "1";
-
-                if (data.status === 'INFECTED') {
-                    row.className = 'danger';
-                    row.innerHTML = `<span>🚨 [BULUTTA YAKALANDI] -> VİRÜS: ${data.malware}</span>`;
-                } else {
-                    alert("✨ Temiz! Devasa VirusTotal veri tabanında da bu dosya güvenli çıktı.");
                 }
-            } catch (e) {
-                row.style.opacity = "1";
-                alert("VirusTotal sorgusu esnasında bir hata oluştu.");
+            } catch (error) {
+                statusText.innerText = "❌ Sunucu bağlantı hatası.";
             }
         }
 
         async function actionFile(action, encodedPath, rowId) {
             try {
-                const response = await fetch('/action', {
+                var response = await fetch('/action', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: action, path: encodedPath })
                 });
-                const data = await response.json();
+                var data = await response.json();
                 alert(data.message);
-                if(data.success) {
-                    document.getElementById(rowId).style.backgroundColor = "#21262d";
-                    document.getElementById(rowId).style.color = "#8b949e";
-                    document.getElementById(rowId).innerHTML = `✅ İşlem tamamlandı.`;
-                    loadQuarantineList(); 
-                }
-            } catch(e) {
-                alert("İşlem gerçekleştirilemedi.");
+                location.reload();
+            } catch (e) {
+                alert("İşlem başarısız.");
             }
         }
 
         async function loadQuarantineList() {
-            const qListDiv = document.getElementById('quarantineList');
+            var qListDiv = document.getElementById('quarantineList');
             try {
-                const response = await fetch('/quarantine_list');
-                const data = await response.json();
-                
-                if (data.length === 0) {
-                    qListDiv.innerHTML = "<p style='color: #8b949e;'>Karantina bölgesi şu an tertemiz. Tehdit bulunmuyor.</p>";
-                    return;
-                }
-                
+                var response = await fetch('/quarantine_list');
+                var data = await response.json();
                 qListDiv.innerHTML = "";
-                data.forEach(item => {
-                    const div = document.createElement('div');
+                
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    var div = document.createElement('div');
                     div.className = 'quarantine-item';
-                    div.innerHTML = `
-                        <div>
-                            <strong>📄 Dosya Adı:</strong> ${item.filename}<br>
-                            <small style="color: #8b949e;">Orijinal Konum: ${item.orig_path}</small>
-                        </div>
-                        <div>
-                            <button class="btn-restore" onclick="manageQuarantine('restore', '${item.id}')">Geri Yükle</button>
-                            <button class="btn-delete" onclick="manageQuarantine('permanent_delete', '${item.id}')">Kalıcı Sil</button>
-                        </div>
-                    `;
+                    div.innerHTML = "<div><strong>📄 " + item.filename + "</strong><br><small>" + item.orig_path + "</small></div>" +
+                                    "<div><button class='btn-restore' onclick='manageQuarantine(\"restore\", \"" + item.id + "\")'>Geri Yükle</button></div>";
                     qListDiv.appendChild(div);
-                });
-            } catch(e) {
-                qListDiv.innerHTML = "<p style='color: #f85149;'>Karantina listesi yüklenirken hata oluştu.</p>";
+                }
+            } catch (e) {
+                qListDiv.innerHTML = "Liste yüklenemedi.";
             }
         }
 
         async function manageQuarantine(action, fileId) {
             try {
-                const response = await fetch('/manage_quarantine', {
+                await fetch('/manage_quarantine', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: action, id: fileId })
                 });
-                const data = await response.json();
-                alert(data.message);
                 loadQuarantineList();
-            } catch(e) {
-                alert("Karantina işlemi başarısız.");
+            } catch (e) {
+                alert("İşlem başarısız.");
             }
         }
 
-        // TADİLATI YAPILAN: Yapay Zeka Analizli ve Kapatma Butonlu Yeni Ağ İzleme Fonksiyonu
         async function loadNetworkList() {
-            const nListDiv = document.getElementById('networkList');
-            nListDiv.innerHTML = "<p style='color: #58a6ff;'>Ağ trafiği analiz ediliyor...</p>";
+            var nListDiv = document.getElementById('networkList');
             try {
-                const response = await fetch('/ag_taramasi');
-                const data = await response.json();
-                
-                if (!data.baglantilar || data.baglantilar.length === 0) {
-                    nListDiv.innerHTML = "<p style='color: #3f6;'>✔️ Dışarıdan bağlanan aktif yabancı IP bağlantısı tespit edilmedi. Güvendesiniz.</p>";
-                    return;
-                }
-                
+                var response = await fetch('/ag_taramasi');
+                var data = await response.json();
                 nListDiv.innerHTML = "";
-                data.baglantilar.forEach(bag => {
-                    const div = document.createElement('div');
-                    div.className = `network-item net-${bag.status}`;
-                    div.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: start; width: 100%;">
-                            <div style="flex-grow: 1; padding-right: 20px;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                                    <span style="font-size: 16px; font-weight: bold; color: white;">⚡ ${bag.program}</span>
-                                    <small style="color: #8b949e;">(PID: ${bag.pid})</small>
-                                    <span class="net-badge badge-${bag.status}">${bag.status}</span>
-                                </div>
-                                <div style="color: #58a6ff; font-size: 14px;">
-                                    📡 Uzak İstasyon: <strong style="color: #f85149;">${bag.ip}:${bag.port}</strong>
-                                </div>
-                                <div class="ai-box">
-                                    🤖 <strong>AI Güvenlik Yorumu:</strong> ${bag.analysis}
-                                </div>
-                            </div>
-                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 140px;">
-                                <span style="background-color: #da3633; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; width: max-content;">AKTİF BAĞLANTI</span>
-                                <button class="btn-delete" style="margin: 0; padding: 8px 12px; font-weight: bold;" onclick="killNetworkProcess('${bag.pid}')">❌ Bağlantıyı Kopar</button>
-                            </div>
-                        </div>
-                    `;
+
+                for (var i = 0; i < data.baglantilar.length; i++) {
+                    var bag = data.baglantilar[i];
+                    var div = document.createElement('div');
+                    div.className = 'network-item';
+                    div.innerHTML = "<div><strong>⚡ " + bag.program + "</strong> (PID: " + bag.pid + ")<br>" +
+                                    "📡 Uzak: " + bag.ip + ":" + bag.port + "</div>" +
+                                    "<button class='btn-delete' onclick='killNetworkProcess(\"" + bag.pid + "\")'>❌ Bağlantıyı Kopar</button>" +
+                                    "<div class='ai-box'>🤖 " + bag.analysis + "</div>";
                     nListDiv.appendChild(div);
-                });
-            } catch(e) {
-                nListDiv.innerHTML = "<p style='color: #f85149;'>Ağ listesi yüklenirken bir hata oluştu.</p>";
+                }
+            } catch (e) {
+                nListDiv.innerHTML = "Ağ verisi alınamadı.";
             }
         }
 
-        // YENİ: Seçilen PID bacağını sistem seviyesinde kesen JS fonksiyonu
         async function killNetworkProcess(pid) {
-            if (!confirm(`PID ${pid} numaralı işlemin ağ bacağını kırıp uygulamayı kapatmak istediğinize emin misiniz?`)) {
-                return;
-            }
+            if (!confirm("PID " + pid + " işlemini sonlandırmak istediğinize emin misiniz?")) return;
             try {
-                const response = await fetch('/kill_network_process', {
+                var response = await fetch('/kill_network_process', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ pid: pid })
                 });
-                const data = await response.json();
+                var data = await response.json();
                 alert(data.message);
-                loadNetworkList(); // Listeyi otomatik yenile
-            } catch(e) {
-                alert("Bağlantı kesme işlemi başarısız oldu.");
+                loadNetworkList();
+            } catch (e) {
+                alert("Bağlantı kesme işlemi başarısız.");
             }
         }
     </script>
